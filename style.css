@@ -2,14 +2,14 @@
   --bg: #0b0b10;
 
   /* LANDSCAPE ayarları */
-  --land-scale: 0.76;   /* biraz küçült */
-  --land-shift-x: 6px;  /* yatay taşıma */
-  --land-shift-y: -4px; /* dikey taşıma */
+  --land-scale: 0.63;   /* biraz küçült */
+  --land-shift-x: 0px;  /* yatay taşıma */
+  --land-shift-y: -77px; /* dikey taşıma */
 
   /* PORTRAIT ayarları */
-  --port-scale: 0.80;   /* biraz büyüt */
+  --port-scale: 0.81;   /* biraz büyüt */
   --port-shift-x: 0px;
-  --port-shift-y: -172px;
+  --port-shift-y: -296px;
 }
 
 /* === GENEL === */
