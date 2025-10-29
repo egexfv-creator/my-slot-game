@@ -1,23 +1,29 @@
-// === Spin ayarları ===
-const BASE_STEP = 220;            // TEK adım (182 + 38)
-const TOTAL_DIST = 1600;          // Bir spin'de gidecek toplam piksel (ör: 1600)
-const DURATION = 1000;            // 1 saniye
-const DELAY = 500;                // 0.5 saniye
-let spinning = false;
+// === Parametreler ===
+const BASE_STEP = 220;             // tek adım (182 + 38)
+const TOTAL_DIST = 1600;           // bir spin toplam mesafe
+const DURATION = 1000;             // her kolon için spin süresi
+const STAGGER = 100;               // kolonlar arası gecikme (ms)
+let globalSpinning = false;
 
-const reel  = document.getElementById('reel');
-const nodes = Array.from(document.querySelectorAll('#reel .symbol'));
 const pool  = ['img/symbol1.png', 'img/symbol2.png', 'img/symbol3.png'];
 
-// i aralığını otomatik bul (ör: -3..3 veya -3..2)
-const I_VALUES = nodes.map(n => {
-  const m = (n.getAttribute('style') || '').match(/--i:\s*(-?\d+)/);
-  return m ? parseInt(m[1], 10) : 0;
-});
-const MIN_I = Math.min(...I_VALUES);   // -3
-const MAX_I = Math.max(...I_VALUES);   // 2 veya 3
+// preload
+(() => { pool.forEach(src => { const im = new Image(); im.src = src; }); })();
 
-// yardımcılar
+const reels = Array.from(document.querySelectorAll('.reel-wrap')).map(wrap => {
+  const reel = wrap.querySelector('.reel');
+  const nodes = Array.from(reel.querySelectorAll('.symbol'));
+
+  const I_VALUES = nodes.map(n => {
+    const m = (n.getAttribute('style') || '').match(/--i:\s*(-?\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  });
+  const MIN_I = Math.min(...I_VALUES);
+  const MAX_I = Math.max(...I_VALUES);
+
+  return { wrap, reel, nodes, MIN_I, MAX_I, lastCommittedSteps: 0 };
+});
+
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const getI = el => {
   const m = (el.getAttribute('style') || '').match(/--i:\s*(-?\d+)/);
@@ -30,79 +36,117 @@ const setI = (el, i) => {
   el.setAttribute('style', s);
 };
 
-// OFFSET — animasyonda MOD KULLANMA (tek kare hayaletini engelle)
-function setOffsetRaw(px) {
-  // 0..BASE_STEP aralığına sıkıştır
-  const clamped = Math.max(0, Math.min(BASE_STEP, Math.round(px)));
-  reel.style.setProperty('--offset', clamped + 'px');
+function setOffsetRaw(reelEl, px) {
+  reelEl.style.setProperty('--offset', Math.round(px) + 'px');
 }
 
-// Bir SONRAKİ karede yeni düzeni kalıcı yap: i = i + 1 (aşağı kayma)
-function commitStepDown() {
-  nodes.forEach(el => {
-    let ni = getI(el) + 1;    // +1 adım aşağı
-    if (ni > MAX_I) ni = MIN_I;
+function commitStepDown(R) {
+  R.nodes.forEach(el => {
+    let ni = getI(el) + 1;
+    if (ni > R.MAX_I) ni = R.MIN_I;
     setI(el, ni);
   });
-  setOffsetRaw(0);
+  setOffsetRaw(R.reel, 0);
 }
 
-// preload
-(() => { pool.forEach(src => { const im = new Image(); im.src = src; }); })();
-
-// Görünmeyen ÜSTTEKİ 3 slotu hızlıca random değiştir (decode beklemeden)
-function swapOffscreenIconTop3Quick() {
-  const targets = nodes.filter(n => {
+function targetsTop3(R) {
+  return R.nodes.filter(n => {
     const i = getI(n);
-    return i >= MIN_I && i < MIN_I + 3; // MIN_I, MIN_I+1, MIN_I+2
+    return i >= R.MIN_I && i < R.MIN_I + 3;
   });
-  for (const target of targets) {
+}
+
+async function prepareNextTop3(R) {
+  const targets = targetsTop3(R);
+  for (const t of targets) {
     const next = pick(pool);
-    if (!target.src.endsWith(next)) target.src = next;
+    t.dataset.nextsrc = next;
+    const im = new Image();
+    im.src = next;
+    try { await im.decode(); } catch(_) {}
   }
 }
 
-function startSpinOnce() {
-  if (spinning) return;
-  spinning = true;
+function applyPreparedTop3(R) {
+  const targets = targetsTop3(R);
+  for (const t of targets) {
+    const next = t.dataset.nextsrc;
+    if (next && !t.src.endsWith(next)) t.src = next;
+  }
+}
 
-  setTimeout(() => {
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+}
+
+function animateReel(R) {
+  return new Promise(async resolve => {
+    const TOTAL_STEPS = Math.max(1, Math.round(TOTAL_DIST / BASE_STEP));
+    const EFFECTIVE_TOTAL = TOTAL_STEPS * BASE_STEP;
+    R.lastCommittedSteps = 0;
+
+    await prepareNextTop3(R);
+
     const t0 = performance.now();
-    const total = TOTAL_DIST;
-    let lastCommittedSteps = 0; // kaç adım commit edildi
+    let swapQueued = 0;
 
     function frame(now) {
       const t = Math.min((now - t0) / DURATION, 1);
-      // LINEER hız (istersen easeOutCubic: const dist = (1 - Math.pow(1 - t, 3)) * total;)
-      const dist = t * total;
+      const dist = easeInOutCubic(t) * EFFECTIVE_TOTAL;
 
-      // Geçilen adım sayısı
       const stepsPassed = Math.floor(dist / BASE_STEP);
 
-      // Yeni adımlar geldikçe anında wrap + üst 3'ü randomla
-      while (lastCommittedSteps < stepsPassed) {
-        commitStepDown();              // i += 1
-        swapOffscreenIconTop3Quick();  // görünmeyen üst 3'ü yenile
-        lastCommittedSteps++;
+      while (R.lastCommittedSteps < stepsPassed) {
+        commitStepDown(R);
+        swapQueued++;
+        R.lastCommittedSteps++;
       }
 
-      // Bu adım içindeki kalan ofset (MOD kullanmadan hesaplayıp 0..BASE_STEP aralığında tut)
       const stepOffset = dist - stepsPassed * BASE_STEP;
-      setOffsetRaw(stepOffset);
+      setOffsetRaw(R.reel, stepOffset);
+
+      if (swapQueued > 0 && stepOffset < 1) {
+        applyPreparedTop3(R);
+        swapQueued = 0;
+        prepareNextTop3(R);
+      }
 
       if (t < 1) {
         requestAnimationFrame(frame);
       } else {
-        // Final: ofseti tam basa al, son görünmeyenleri de tazele
+        while (R.lastCommittedSteps < TOTAL_STEPS) {
+          commitStepDown(R);
+          swapQueued++;
+          R.lastCommittedSteps++;
+        }
         requestAnimationFrame(() => {
-          setOffsetRaw(0);
-          swapOffscreenIconTop3Quick();
-          spinning = false;
+          setOffsetRaw(R.reel, 0);
+          if (swapQueued > 0) applyPreparedTop3(R);
+          resolve();
         });
       }
     }
     requestAnimationFrame(frame);
-  }, DELAY);
+  });
 }
 
-document.addEventListener('click', startSpinOnce);
+async function startAll() {
+  if (globalSpinning) return;
+  globalSpinning = true;
+
+  const jobs = reels.map((R, idx) =>
+    new Promise(res => setTimeout(() => animateReel(R).then(res), idx * STAGGER))
+  );
+
+  await Promise.all(jobs);
+  globalSpinning = false;
+}
+
+document.addEventListener('click', startAll);
+
+
+
+
+
+
+

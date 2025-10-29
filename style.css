@@ -9,31 +9,46 @@ html, body {
 }
 #stage {
   position: relative;
-  width: 1920px;   /* çift */
-  height: 1920px;  /* çift */
+  width: 1920px;
+  height: 1080px;
   background-image: url('img/bg.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
 }
 
-/* REEL FRAME */
-#reel-frame {
+/* 5 kolon guruplama */
+#reels {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 268px;    /* çift */
-  height: 622px;   /* çift */
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
+  display: flex;
+  gap: 24px;
+}
+
+/* her kolon alanı */
+.reel-wrap {
+  position: relative;
+  width: 268px;
+  height: 622px;
+}
+
+/* çerçeve */
+.reel-frame {
+  position: absolute;
+  inset: 0;
+  width: 268px;
+  height: 622px;
   z-index: 1;
   pointer-events: none;
 }
 
-/* REEL + SEMBOLLER (mask var) */
-#reel {
-  --reelH: 622px;    /* çift */
-  --symH: 182px;     /* çift */
-  --symW: 116px;     /* çift */
+/* masklı reel penceresi */
+.reel {
+  --reelH: 622px;
+  --symH: 182px;
+  --symW: 116px;
   --gap: calc((var(--reelH) - 3 * var(--symH)) / 2); /* 38 */
   --step: calc(var(--symH) + var(--gap));            /* 220 */
   --offset: 0px;
@@ -42,11 +57,11 @@ html, body {
   top: 50%;
   left: 50%;
   width: var(--symW);
-  height: var(--reelH);            /* kahverengi pencere yüksekliği */
+  height: calc(var(--symH) * 3); /* sadece 3 görünür */
   transform: translate(-50%, -50%);
   z-index: 2;
-  overflow: hidden;                /* MASK */
-  clip-path: inset(0 0 0 0);       /* performans için */
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
 }
 
 .symbol {
@@ -58,7 +73,6 @@ html, body {
   top: calc(var(--step) * var(--i) + var(--offset));
   user-select: none;
   pointer-events: none;
-  z-index: 2;
   backface-visibility: hidden;
   will-change: transform;
 }
