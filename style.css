@@ -1,131 +1,73 @@
-:root{
-  /* Oyun alanı sabit oran */
-  --canvas-w: 1416;              /* px */
-  --canvas-h: 792;               /* px */
+:root {
+  --canvas-w: 1416;
+  --canvas-h: 792;
   --cols: 5;
   --rows: 3;
-
-  /* Sembol ölçüleri (1.5'e bölünebilir) */
-  --sym: 252px;                  /* kare kenar, 252 = 1.5 * 168 */
-  --gap: 9px;                    /* 9 = 1.5 * 6 */
-
-  /* Portrait kırpma göstergesi (her iki yanda 72px) */
-  --portrait-crop: 72px;
+  --sym: 252px;
+  --gap: 9px;
 }
 
-/* Sahne: ortalı, tam ekran */
-html, body{
-  height:100%;
-  margin:0;
-  background:#0b0b0b;
-  color:#cfcfcf;
-  font-family:system-ui, Arial, sans-serif;
-}
-#stage{
-  height:100%;
-  display:grid;
-  place-items:center;
-  padding:12px;
-  box-sizing:border-box;
+html, body {
+  height: 100%;
+  margin: 0;
+  background: #0b0b0b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Canvas: 1416x792 oranını korur, ekrana sığar */
-#canvas{
-  position:relative;
+#stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* 1416x792 oranlı ana alan */
+#canvas {
   aspect-ratio: calc(var(--canvas-w) / var(--canvas-h));
-  width: min(100vw, calc(100vh * (var(--canvas-w) / var(--canvas-h))));
+  width: 100%;
   max-width: 100%;
-  background: radial-gradient(120% 120% at 50% 50%, #2a0030 0%, #150015 55%, #090909 100%);
-  border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.05);
-  overflow:hidden; /* portrait’te yan maskelerin altında kırpma etkisi */
+  background: radial-gradient(circle at center, #260028 0%, #0e0010 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s ease;
 }
 
-/* 5x3 grid */
-.grid{
-  position:absolute;
-  inset:0;
-  display:grid;
-  box-sizing:border-box;
-
-  /* Grid’i ortala; toplam genişlik 5*sym + 4*gap */
-  place-content:center;
+/* Grid */
+.grid {
+  display: grid;
   grid-template-columns: repeat(var(--cols), var(--sym));
-  grid-template-rows:    repeat(var(--rows), var(--sym));
+  grid-template-rows: repeat(var(--rows), var(--sym));
   gap: var(--gap);
-
-  /* Reel alanını merkezde göstermek için iç margin (canvas boşlukları) */
-  /* Bu padding ile semboller canvas içinde rahat bir nefes alır */
-  padding: calc(var(--sym) / 2) calc(var(--sym) / 3);
 }
 
 /* Kare semboller */
-.symbol{
-  display:grid;
-  place-items:center;
-  background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
+.symbol {
+  background: linear-gradient(180deg, #2e2e2e 0%, #1b1b1b 100%);
   border-radius: 12px;
-  outline: 1.5px solid rgba(255,255,255,.08);
-  box-shadow:
-    inset 0 0 0 1.5px rgba(0,0,0,.6),
-    0 6px 14px rgba(0,0,0,.35);
-  user-select:none;
-  font-weight:700;
-  font-size:18px;
-  color:#b9ffd0;
-  letter-spacing:0.5px;
+  outline: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.7), 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* Portrait modda yan kırpma bandı simülasyonu */
-.side-mask{
-  position:absolute;
-  top:0; bottom:0;
-  width: var(--portrait-crop);
-  pointer-events:none;
-  opacity:.8;
-  display:none; /* sadece portrait’te göster */
-  background: linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
-  mix-blend-mode:multiply;
-}
-.side-mask.right{
-  right:0;
-  transform: scaleX(-1);
-}
-.side-mask.left{
-  left:0;
-}
-
-/* Bilgi etiketi */
-.badge{
-  position:absolute;
-  right:10px; bottom:10px;
-  padding:6px 10px;
-  border-radius:9px;
-  font-size:12px;
-  line-height:1;
-  background: rgba(0,0,0,.55);
-  color:#eee;
-  backdrop-filter: blur(4px);
-  border:1px solid rgba(255,255,255,.08);
-}
-
-/* ORIENTATION KURALLARI */
-
-/* LANDSCAPE: yan maskeleri gizle, sembol boyutu sabit kalsın */
-@media (orientation: landscape){
-  .side-mask{ display:none; }
-}
-
-/* PORTRAIT: yan maskeleri göster, grid biraz daha sıkılaşsın */
-@media (orientation: portrait){
-  .side-mask{ display:block; }
-
-  /* Telefonda sığdırmak için sembol ve gap’i ufalt */
-  :root{
-    --sym: 240px;   /* 240–264 aralığındayız, 1.5’a bölünür */
-    --gap: 9px;
+/* LANDSCAPE modda ölçek normal */
+@media (orientation: landscape) {
+  #canvas {
+    width: 100vw;
+    height: auto;
+    transform: scale(1);
   }
+}
 
-  /* Canvas genişliği, ekran genişliğine göre sığacak şekilde zaten ölçekleniyor.
-     Maskeler 72px yan kırpma alanını simgeler. */
+/* PORTRAIT modda zoom out yap (Synot efekti) */
+@media (orientation: portrait) {
+  #canvas {
+    height: 100vh;
+    width: auto;
+    transform: scale(0.85); /* Synot'taki küçültme etkisi */
+    transform-origin: center center;
+  }
 }
