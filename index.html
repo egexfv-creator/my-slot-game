@@ -1,83 +1,30 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Slot 5x3 — Staggered Spin</title>
+  <title>Slot Prototype — Click = Random Top Only</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div id="stage">
-    <div id="reels">
-      <!-- 5 kolon -->
-      <div class="reel-wrap">
-        <img class="reel-frame" src="img/reel_frame.png" alt="">
-        <div class="reel" style="--offset:0px;">
-          <img class="symbol" src="img/symbol1.png" style="--i:-3" alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:-2" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:-1" alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:0"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:1"  alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:2"  alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:3"  alt="">
-        </div>
-      </div>
+    <img id="reel-frame" src="img/reel_frame.png" alt="reel frame"/>
 
-      <div class="reel-wrap">
-        <img class="reel-frame" src="img/reel_frame.png" alt="">
-        <div class="reel" style="--offset:0px;">
-          <img class="symbol" src="img/symbol2.png" style="--i:-3" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:-2" alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:-1" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:0"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:1"  alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:2"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:3"  alt="">
-        </div>
-      </div>
-
-      <div class="reel-wrap">
-        <img class="reel-frame" src="img/reel_frame.png" alt="">
-        <div class="reel" style="--offset:0px;">
-          <img class="symbol" src="img/symbol3.png" style="--i:-3" alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:-2" alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:-1" alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:0"  alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:1"  alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:2"  alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:3"  alt="">
-        </div>
-      </div>
-
-      <div class="reel-wrap">
-        <img class="reel-frame" src="img/reel_frame.png" alt="">
-        <div class="reel" style="--offset:0px;">
-          <img class="symbol" src="img/symbol1.png" style="--i:-3" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:-2" alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:-1" alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:0"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:1"  alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:2"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:3"  alt="">
-        </div>
-      </div>
-
-      <div class="reel-wrap">
-        <img class="reel-frame" src="img/reel_frame.png" alt="">
-        <div class="reel" style="--offset:0px;">
-          <img class="symbol" src="img/symbol2.png" style="--i:-3" alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:-2" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:-1" alt="">
-          <img class="symbol" src="img/symbol3.png" style="--i:0"  alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:1"  alt="">
-          <img class="symbol" src="img/symbol2.png" style="--i:2"  alt="">
-          <img class="symbol" src="img/symbol1.png" style="--i:3"  alt="">
-        </div>
-      </div>
+    <div id="reel" style="--offset: 0px;">
+      <!-- Sadece bu değişecek -->
+      <img class="symbol" id="sym-top" src="img/symbol1.png" style="--i:-3" alt="">
+      <!-- Diğerleri sabit -->
+      <img class="symbol" src="img/symbol2.png" style="--i:-2" alt="">
+      <img class="symbol" src="img/symbol3.png" style="--i:-1" alt="">
+      <img class="symbol" src="img/symbol2.png" style="--i:0"  alt="">
+      <img class="symbol" src="img/symbol1.png" style="--i:1"  alt="">
+      <img class="symbol" src="img/symbol3.png" style="--i:2"  alt="">
+      <img class="symbol" src="img/symbol2.png" style="--i:3" alt="">
     </div>
   </div>
 
   <script src="app.js" defer></script>
 </body>
 </html>
+
 
