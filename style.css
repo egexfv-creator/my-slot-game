@@ -1,73 +1,63 @@
-:root {
-  --canvas-w: 1416;
-  --canvas-h: 792;
-  --cols: 5;
-  --rows: 3;
-  --sym: 252px;
-  --gap: 9px;
+/* === TURKCE ACIKLAMA: GENEL DEGISKENLER === */
+:root{
+  /* Arka plan */
+  --bg: #0b0b10;
+
+  /* YATAY (LANDSCAPE) ayarları */
+  --mxL: 60px;      /* sağ-sol pay */
+  --myL: 40px;      /* üst-alt pay */
+  --land-scale: 0.94;   /* %6 küçültme */
+  --land-shiftY: -4px;  /* yukarı taşıma (azaltıldı) */
+
+  /* DIKEY (PORTRAIT) ayarları */
+  --mxP: 20px;
+  --myP: 120px;
+  --port-scale: 1.06;   /* hafif büyütme */
+  --port-shiftY: -20px; /* biraz yukarı taşıma */
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  background: #0b0b0b;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* === TURKCE ACIKLAMA: SAHNE === */
+html, body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+}
+#stage{
+  position:fixed; inset:0;
+  display:grid; place-items:center;
+  overflow:hidden;
 }
 
-#stage {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+/* === TURKCE ACIKLAMA: REEL GORSEL TEMELI === */
+#reel{
+  height:auto;
+  display:block;
+  transform-origin:center;
+  transition: transform .25s ease, width .25s ease;
 }
 
-/* 1416x792 oranlı ana alan */
-#canvas {
-  aspect-ratio: calc(var(--canvas-w) / var(--canvas-h));
-  width: 100%;
-  max-width: 100%;
-  background: radial-gradient(circle at center, #260028 0%, #0e0010 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: transform 0.5s ease;
-}
-
-/* Grid */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(var(--cols), var(--sym));
-  grid-template-rows: repeat(var(--rows), var(--sym));
-  gap: var(--gap);
-}
-
-/* Kare semboller */
-.symbol {
-  background: linear-gradient(180deg, #2e2e2e 0%, #1b1b1b 100%);
-  border-radius: 12px;
-  outline: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.7), 0 3px 10px rgba(0, 0, 0, 0.4);
-}
-
-/* LANDSCAPE modda ölçek normal */
-@media (orientation: landscape) {
-  #canvas {
-    width: 100vw;
-    height: auto;
-    transform: scale(1);
+/* === YATAY (LANDSCAPE) === */
+@media (orientation:landscape){
+  #reel{
+    width: calc(
+      min(
+        100vw - 2*var(--mxL),
+        (16/9) * (100vh - 2*var(--myL))
+      )
+    );
+    transform: scale(var(--land-scale)) translateY(var(--land-shiftY));
   }
 }
 
-/* PORTRAIT modda zoom out yap (Synot efekti) */
-@media (orientation: portrait) {
-  #canvas {
-    height: 100vh;
-    width: auto;
-    transform: scale(0.85); /* Synot'taki küçültme etkisi */
-    transform-origin: center center;
+/* === DIKEY (PORTRAIT) === */
+@media (orientation:portrait){
+  #reel{
+    width: calc(
+      min(
+        100vw - 2*var(--mxP),
+        (16/9) * (100vh - 2*var(--myP))
+      )
+    );
+    transform: scale(var(--port-scale)) translateY(var(--port-shiftY));
   }
 }
