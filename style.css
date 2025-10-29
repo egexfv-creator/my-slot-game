@@ -1,0 +1,64 @@
+/* SAHNE */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#stage {
+  position: relative;
+  width: 1920px;   /* çift */
+  height: 1920px;  /* çift */
+  background-image: url('img/bg.png');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* REEL FRAME */
+#reel-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 268px;    /* çift */
+  height: 622px;   /* çift */
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* REEL + SEMBOLLER (mask var) */
+#reel {
+  --reelH: 622px;    /* çift */
+  --symH: 182px;     /* çift */
+  --symW: 116px;     /* çift */
+  --gap: calc((var(--reelH) - 3 * var(--symH)) / 2); /* 38 */
+  --step: calc(var(--symH) + var(--gap));            /* 220 */
+  --offset: 0px;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--symW);
+  height: var(--reelH);            /* kahverengi pencere yüksekliği */
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  overflow: hidden;                /* MASK */
+  clip-path: inset(0 0 0 0);       /* performans için */
+}
+
+.symbol {
+  position: absolute;
+  width: var(--symW);
+  height: var(--symH);
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(var(--step) * var(--i) + var(--offset));
+  user-select: none;
+  pointer-events: none;
+  z-index: 2;
+  backface-visibility: hidden;
+  will-change: transform;
+}
