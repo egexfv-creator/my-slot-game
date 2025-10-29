@@ -1,61 +1,131 @@
-/* SAHNE */
-html, body {
-  height: 100%;
-  margin: 0;
-  background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-#stage {
-  position: relative;
-  width: 1920px;   /* çift */
-  height: 1920px;  /* çift */
-  background-image: url('img/bg.png');
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
+:root{
+  /* Oyun alanı sabit oran */
+  --canvas-w: 1416;              /* px */
+  --canvas-h: 792;               /* px */
+  --cols: 5;
+  --rows: 3;
+
+  /* Sembol ölçüleri (1.5'e bölünebilir) */
+  --sym: 252px;                  /* kare kenar, 252 = 1.5 * 168 */
+  --gap: 9px;                    /* 9 = 1.5 * 6 */
+
+  /* Portrait kırpma göstergesi (her iki yanda 72px) */
+  --portrait-crop: 72px;
 }
 
-/* REEL FRAME */
-#reel-frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 268px;    /* çift */
-  height: 622px;   /* çift */
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  pointer-events: none;
+/* Sahne: ortalı, tam ekran */
+html, body{
+  height:100%;
+  margin:0;
+  background:#0b0b0b;
+  color:#cfcfcf;
+  font-family:system-ui, Arial, sans-serif;
+}
+#stage{
+  height:100%;
+  display:grid;
+  place-items:center;
+  padding:12px;
+  box-sizing:border-box;
 }
 
-/* REEL + SEMBOLLER (mask yok) */
-#reel {
-  --reelH: 622px;    /* çift */
-  --symH: 182px;     /* çift */
-  --symW: 116px;     /* çift */
-  --gap: calc((var(--reelH) - 3 * var(--symH)) / 2); /* 38 */
-  --step: calc(var(--symH) + var(--gap));            /* 220 */
-  --offset: 0px;
-
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--symW);
-  height: var(--reelH);
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  overflow: visible;
+/* Canvas: 1416x792 oranını korur, ekrana sığar */
+#canvas{
+  position:relative;
+  aspect-ratio: calc(var(--canvas-w) / var(--canvas-h));
+  width: min(100vw, calc(100vh * (var(--canvas-w) / var(--canvas-h))));
+  max-width: 100%;
+  background: radial-gradient(120% 120% at 50% 50%, #2a0030 0%, #150015 55%, #090909 100%);
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.05);
+  overflow:hidden; /* portrait’te yan maskelerin altında kırpma etkisi */
 }
 
-.symbol {
-  position: absolute;
-  width: var(--symW);
-  height: var(--symH);
-  left: 50%;
-  transform: translateX(-50%);
-  top: calc(var(--step) * var(--i) + var(--offset));
-  user-select: none;
-  pointer-events: none;
-  z-index: 2;
+/* 5x3 grid */
+.grid{
+  position:absolute;
+  inset:0;
+  display:grid;
+  box-sizing:border-box;
+
+  /* Grid’i ortala; toplam genişlik 5*sym + 4*gap */
+  place-content:center;
+  grid-template-columns: repeat(var(--cols), var(--sym));
+  grid-template-rows:    repeat(var(--rows), var(--sym));
+  gap: var(--gap);
+
+  /* Reel alanını merkezde göstermek için iç margin (canvas boşlukları) */
+  /* Bu padding ile semboller canvas içinde rahat bir nefes alır */
+  padding: calc(var(--sym) / 2) calc(var(--sym) / 3);
+}
+
+/* Kare semboller */
+.symbol{
+  display:grid;
+  place-items:center;
+  background: linear-gradient(180deg, #2f2f2f 0%, #1a1a1a 100%);
+  border-radius: 12px;
+  outline: 1.5px solid rgba(255,255,255,.08);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(0,0,0,.6),
+    0 6px 14px rgba(0,0,0,.35);
+  user-select:none;
+  font-weight:700;
+  font-size:18px;
+  color:#b9ffd0;
+  letter-spacing:0.5px;
+}
+
+/* Portrait modda yan kırpma bandı simülasyonu */
+.side-mask{
+  position:absolute;
+  top:0; bottom:0;
+  width: var(--portrait-crop);
+  pointer-events:none;
+  opacity:.8;
+  display:none; /* sadece portrait’te göster */
+  background: linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+  mix-blend-mode:multiply;
+}
+.side-mask.right{
+  right:0;
+  transform: scaleX(-1);
+}
+.side-mask.left{
+  left:0;
+}
+
+/* Bilgi etiketi */
+.badge{
+  position:absolute;
+  right:10px; bottom:10px;
+  padding:6px 10px;
+  border-radius:9px;
+  font-size:12px;
+  line-height:1;
+  background: rgba(0,0,0,.55);
+  color:#eee;
+  backdrop-filter: blur(4px);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+/* ORIENTATION KURALLARI */
+
+/* LANDSCAPE: yan maskeleri gizle, sembol boyutu sabit kalsın */
+@media (orientation: landscape){
+  .side-mask{ display:none; }
+}
+
+/* PORTRAIT: yan maskeleri göster, grid biraz daha sıkılaşsın */
+@media (orientation: portrait){
+  .side-mask{ display:block; }
+
+  /* Telefonda sığdırmak için sembol ve gap’i ufalt */
+  :root{
+    --sym: 240px;   /* 240–264 aralığındayız, 1.5’a bölünür */
+    --gap: 9px;
+  }
+
+  /* Canvas genişliği, ekran genişliğine göre sığacak şekilde zaten ölçekleniyor.
+     Maskeler 72px yan kırpma alanını simgeler. */
 }
