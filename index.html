@@ -2,30 +2,120 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" 
+  <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>OYUN ALANI TEST</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Fix: 16:9 Safe Area, Consistent Across Devices</title>
+  <style>
+    :root{
+      --bg:#0b0b10;
+
+      /* LANDSCAPE varsayılanları (tüm cihazlarda tutarlı) */
+      --land-margin-x: 24px;             /* sağ-sol güvenli pay */
+      --land-margin-y: 16px;             /* üst-alt güvenli pay */
+      --land-scale: 0.83;                /* reel görüntüyü % küçült */
+      --land-shift-y: -1%;               /* kendi yüksekliğine göre taşı (yüzde) */
+      --land-shift-x: 0%;
+
+      /* PORTRAIT varsayılanları */
+      --port-margin-x: 16px;
+      --port-margin-y: 80px;
+      --port-scale: 0.88;
+      --port-shift-y: -108%;
+      --port-shift-x: 0%;
+    }
+
+    html,body{
+      height:100%; margin:0; background:var(--bg);
+      overflow:hidden; touch-action:manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Sahne: ortalı, letterbox garanti */
+    #stage{
+      position:fixed; inset:0; display:grid; place-items:center;
+      overflow:hidden; background:var(--bg);
+    }
+
+    /* 16:9 güvenli alan konteyneri */
+    #frame{
+      position:relative;
+      aspect-ratio:16/9;
+      /* genişlik = min(ekran genişliği - yatay pay, 16/9 * (ekran yüksekliği - dikey pay)) */
+      width: calc(min(100vw - 2*var(--frame-mx), (16/9) * (100vh - 2*var(--frame-my))));
+      max-width: 100vw; max-height: 100vh;
+    }
+
+    /* Görsel: contain, merkez, transform ile ince ayar */
+    #reel{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:contain; object-position:center;
+      transform-origin:center;
+      transition: transform .25s ease;
+      /* transform değerleri media query içinde atanacak */
+    }
+
+    /* Dön çevir yazısı (istersen dursun) */
+    #rotate{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      padding:10px 16px; border-radius:10px;
+      font: 600 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:#fff; background:rgba(0,0,0,.55);
+      letter-spacing:.2px; display:none; user-select:none;
+    }
+
+    /* LANDSCAPE: ölçek + taşıma yüzdeyle (cihazdan bağımsız) */
+    @media (orientation:landscape){
+      :root{
+        --frame-mx: var(--land-margin-x);
+        --frame-my: var(--land-margin-y);
+      }
+      #reel{
+        transform:
+          translate(var(--land-shift-x), var(--land-shift-y))
+          scale(var(--land-scale));
+      }
+      #rotate{ display:none; }
+    }
+
+    /* PORTRAIT */
+    @media (orientation:portrait){
+      :root{
+        --frame-mx: var(--port-margin-x);
+        --frame-my: var(--port-margin-y);
+      }
+      #reel{
+        transform:
+          translate(var(--port-shift-x), var(--port-shift-y))
+          scale(var(--port-scale));
+      }
+      #rotate{ display:block; }
+    }
+  </style>
 </head>
 <body>
-  <!-- SAHNE ALANI -->
   <div id="stage">
-    <!-- REEL GÖRSELİ -->
-    <img id="reel" src="img/layout_tek.jpg" alt="reel-area">
-    <!-- DİKEY UYARISI -->
+    <div id="frame">
+      <img id="reel" src="img/layout_tek.jpg" alt="reel-area">
+    </div>
     <div id="rotate">LÜTFEN TELEFONU YANA ÇEVİRİN</div>
   </div>
 
-  <!-- CACHE BUSTING -->
   <script>
-    const img = document.getElementById('reel');
-    img.src = img.src + (img.src.includes('?') ? '&' : '?') + 'v=' + Date.now();
+    // Cache-busting: eski JPG yapışmasın
+    (function(){
+      const img = document.getElementById('reel');
+      const u = new URL(img.src, location.href);
+      u.searchParams.set('v', Date.now());
+      img.src = u.toString();
+    })();
 
-    // Orientation değiştiğinde zoom resetle
-    window.addEventListener('resize', () => {
-      document.body.style.zoom = '1';
+    // iOS/Android orientation zoom sapıtmasın
+    addEventListener('orientationchange', () => {
       document.documentElement.style.zoom = '1';
-    });
+      document.body.style.zoom = '1';
+      setTimeout(() => { window.scrollTo(0,0); }, 50);
+    }, {passive:true});
   </script>
 </body>
 </html>
