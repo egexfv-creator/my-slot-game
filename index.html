@@ -2,23 +2,30 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" 
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>OYUN ALANI TEST</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- TURKCE ACIKLAMA: SAHNE KONTEYNERI, ARKA PLAN RENKLI VE MERKEZDE -->
+  <!-- SAHNE ALANI -->
   <div id="stage">
-    <!-- TURKCE ACIKLAMA: SADECE REEL ALANINI TEMSIL EDEN GORSEL -->
+    <!-- REEL GÖRSELİ -->
     <img id="reel" src="img/layout_tek.jpg" alt="reel-area">
-    <!-- TURKCE ACIKLAMA: DIKEY MOD UYARISI -->
+    <!-- DİKEY UYARISI -->
     <div id="rotate">LÜTFEN TELEFONU YANA ÇEVİRİN</div>
   </div>
 
-  <!-- TURKCE ACIKLAMA: CACHE-BUSTING; ESKI JPG'YI ZORLA GUNCELLE -->
+  <!-- CACHE BUSTING -->
   <script>
     const img = document.getElementById('reel');
     img.src = img.src + (img.src.includes('?') ? '&' : '?') + 'v=' + Date.now();
+
+    // Orientation değiştiğinde zoom resetle
+    window.addEventListener('resize', () => {
+      document.body.style.zoom = '1';
+      document.documentElement.style.zoom = '1';
+    });
   </script>
 </body>
 </html>

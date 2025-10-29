@@ -1,63 +1,70 @@
-/* === TURKCE ACIKLAMA: GENEL DEGISKENLER === */
-:root{
-  /* Arka plan */
+/* === GENEL === */
+:root {
   --bg: #0b0b10;
-
-  /* YATAY (LANDSCAPE) ayarları */
-  --mxL: 60px;      /* sağ-sol pay */
-  --myL: 40px;      /* üst-alt pay */
-  --land-scale: 0.94;   /* %6 küçültme */
-  --land-shiftY: -4px;  /* yukarı taşıma (azaltıldı) */
-
-  /* DIKEY (PORTRAIT) ayarları */
-  --mxP: 20px;
-  --myP: 120px;
-  --port-scale: 1.06;   /* hafif büyütme */
-  --port-shiftY: -20px; /* biraz yukarı taşıma */
+  --land-scale: 0.96;
+  --port-scale: 1.04;
 }
 
-/* === TURKCE ACIKLAMA: SAHNE === */
-html, body{
-  height:100%;
-  margin:0;
-  background:var(--bg);
-}
-#stage{
-  position:fixed; inset:0;
-  display:grid; place-items:center;
-  overflow:hidden;
+/* SAYFA */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  overflow: hidden;
+  touch-action: none;
 }
 
-/* === TURKCE ACIKLAMA: REEL GORSEL TEMELI === */
-#reel{
-  height:auto;
-  display:block;
-  transform-origin:center;
-  transition: transform .25s ease, width .25s ease;
+/* SAHNE KONTEYNERİ */
+#stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
 
-/* === YATAY (LANDSCAPE) === */
-@media (orientation:landscape){
-  #reel{
-    width: calc(
-      min(
-        100vw - 2*var(--mxL),
-        (16/9) * (100vh - 2*var(--myL))
-      )
-    );
-    transform: scale(var(--land-scale)) translateY(var(--land-shiftY));
+/* REEL GÖRSELİ */
+#reel {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  display: block;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+/* DİKEY UYARISI */
+#rotate {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: Arial, sans-serif;
+  color: white;
+  background: rgba(0,0,0,0.6);
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  display: none;
+}
+
+/* YATAY (LANDSCAPE) */
+@media (orientation: landscape) {
+  #reel {
+    transform: scale(var(--land-scale));
+  }
+  #rotate {
+    display: none;
   }
 }
 
-/* === DIKEY (PORTRAIT) === */
-@media (orientation:portrait){
-  #reel{
-    width: calc(
-      min(
-        100vw - 2*var(--mxP),
-        (16/9) * (100vh - 2*var(--myP))
-      )
-    );
-    transform: scale(var(--port-scale)) translateY(var(--port-shiftY));
+/* DİKEY (PORTRAIT) */
+@media (orientation: portrait) {
+  #reel {
+    transform: scale(var(--port-scale));
+  }
+  #rotate {
+    display: block;
   }
 }
