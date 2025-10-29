@@ -1,29 +1,33 @@
-/* === GENEL === */
 :root {
   --bg: #0b0b10;
-  --land-scale: 0.96;
-  --port-scale: 1.04;
+
+  /* LANDSCAPE ayarları */
+  --land-scale: 0.76;   /* biraz küçült */
+  --land-shift-x: 6px;  /* yatay taşıma */
+  --land-shift-y: -4px; /* dikey taşıma */
+
+  /* PORTRAIT ayarları */
+  --port-scale: 0.80;   /* biraz büyüt */
+  --port-shift-x: 0px;
+  --port-shift-y: -172px;
 }
 
-/* SAYFA */
+/* === GENEL === */
 html, body {
-  height: 100%;
   margin: 0;
+  height: 100%;
   background: var(--bg);
   overflow: hidden;
   touch-action: none;
 }
 
-/* SAHNE KONTEYNERİ */
 #stage {
   position: fixed;
   inset: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
 }
 
-/* REEL GÖRSELİ */
 #reel {
   max-width: 100%;
   max-height: 100%;
@@ -33,7 +37,6 @@ html, body {
   transition: transform 0.3s ease;
 }
 
-/* DİKEY UYARISI */
 #rotate {
   position: absolute;
   bottom: 40px;
@@ -41,28 +44,29 @@ html, body {
   transform: translateX(-50%);
   font-family: Arial, sans-serif;
   color: white;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   padding: 10px 20px;
   border-radius: 8px;
   text-align: center;
-  font-size: 1rem;
   display: none;
 }
 
-/* YATAY (LANDSCAPE) */
+/* === YATAY (LANDSCAPE) === */
 @media (orientation: landscape) {
   #reel {
-    transform: scale(var(--land-scale));
+    transform: scale(var(--land-scale))
+               translate(var(--land-shift-x), var(--land-shift-y));
   }
   #rotate {
     display: none;
   }
 }
 
-/* DİKEY (PORTRAIT) */
+/* === DİKEY (PORTRAIT) === */
 @media (orientation: portrait) {
   #reel {
-    transform: scale(var(--port-scale));
+    transform: scale(var(--port-scale))
+               translate(var(--port-shift-x), var(--port-shift-y));
   }
   #rotate {
     display: block;
